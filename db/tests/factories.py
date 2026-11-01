@@ -90,3 +90,67 @@ def make_invoice(conn, gstin, party_gstin, invoice_no, invoice_date, lines,
              ln.get("sgst", 0), ln.get("cess", 0), ln.get("itc_category", "ELIGIBLE")),
         )
     return inv_id, fy
+
+
+def make_period(conn, gstin, period="092026"):
+    return conn.execute("SELECT sp_open_period(%s, %s)", (gstin, period)).fetchone()[0]
+
+
+def build_2b_payload(gstin, rtnprd, docs):
+    """Build a GSTR-2B payload from flat doc dicts (document-level amounts)."""
+    import datetime
+
+    b2b, b2ba, cdnr = {}, {}, {}
+    names = {}
+    for d in docs:
+        dt = d["dt"]
+        if isinstance(dt, (datetime.date, datetime.datetime)):
+            dt = dt.strftime("%d-%m-%Y")
+        amt = {k: d.get(k, 0) for k in ("igst", "cgst", "sgst", "cess")}
+        txval = d["txval"]
+        val = float(txval) + sum(float(v) for v in amt.values())
+        section = d.get("section", "b2b")
+        ctin = d["ctin"]
+        names[ctin] = d.get("trdnm", "Supplier")
+        if section == "cdnr":
+            row = {"ntnum": d["inum"], "ntty": d.get("ntty", "C"), "dt": dt,
+                   "val": val, "txval": txval, **amt}
+            cdnr.setdefault(ctin, []).append(row)
+        else:
+            row = {"inum": d["inum"], "dt": dt, "val": val, "pos": gstin[:2],
+                   "rev": "N", "itcavl": "Y", "txval": txval, **amt}
+            if section == "b2ba":
+                row["oinum"] = d.get("oinum")
+            (b2ba if section == "b2ba" else b2b).setdefault(ctin, []).append(row)
+
+    def grp(m, key):
+        return [{"ctin": c, "trdnm": names[c], key: rows} for c, rows in m.items()]
+
+    return {"data": {"gstin": gstin, "rtnprd": rtnprd, "docdata": {
+        "b2b": grp(b2b, "inv"), "b2ba": grp(b2ba, "inv"), "cdnr": grp(cdnr, "nt")}}}
+
+
+def import_2b(conn, period_id, payload, user_id, source="DRAFT_2B"):
+    import json
+
+    return conn.execute(
+        "SELECT sp_import_gstr2b(%s, %s::jsonb, %s, %s)",
+        (period_id, json.dumps(payload), source, user_id),
+    ).fetchone()[0]
+
+
+def reconcile(conn, import_id, user_id):
+    return conn.execute("SELECT sp_reconcile(%s, %s)", (import_id, user_id)).fetchone()[0]
+
+
+def recon_rows(conn, import_id):
+    """(status, matched_by, books_invoice_no, portal_invoice_no, diff_tax) ordered stably."""
+    return conn.execute(
+        "SELECT r.status::text, r.matched_by, i.invoice_no, e.invoice_no, r.diff_tax "
+        "FROM recon_result r "
+        "LEFT JOIN invoice i ON i.invoice_id = r.invoice_id AND i.fin_year = r.invoice_fy "
+        "LEFT JOIN gstr2b_entry e ON e.entry_id = r.entry_id AND e.fin_year = r.entry_fy "
+        "WHERE r.import_id = %s "
+        "ORDER BY r.status::text, i.invoice_no, e.invoice_no",
+        (import_id,),
+    ).fetchall()

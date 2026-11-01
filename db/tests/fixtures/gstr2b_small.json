@@ -1,0 +1,122 @@
+{
+ "data": {
+  "gstin": "07AAPFU0939F1ZX",
+  "rtnprd": "092026",
+  "docdata": {
+   "b2b": [
+    {
+     "ctin": "07ABCDE1234F1Z2",
+     "trdnm": "Alpha Traders",
+     "inv": [
+      {
+       "inum": "INV-001",
+       "dt": "05-09-2026",
+       "val": 11800,
+       "pos": "07",
+       "rev": "N",
+       "itcavl": "Y",
+       "items": [
+        {
+         "txval": 5000,
+         "igst": 0,
+         "cgst": 450,
+         "sgst": 450,
+         "cess": 0
+        },
+        {
+         "txval": 5000,
+         "igst": 0,
+         "cgst": 450,
+         "sgst": 450,
+         "cess": 0
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ctin": "27BCDEF2345G1ZL",
+     "trdnm": "Beta Supplies",
+     "inv": [
+      {
+       "inum": "INV-002",
+       "dt": "10-09-2026",
+       "val": 11800,
+       "pos": "07",
+       "rev": "N",
+       "itcavl": "Y",
+       "items": [
+        {
+         "txval": 10000,
+         "igst": 1800,
+         "cgst": 0,
+         "sgst": 0,
+         "cess": 0
+        }
+       ]
+      },
+      {
+       "inum": "INV-003",
+       "dt": "12-09-2026",
+       "val": 5900,
+       "pos": "07",
+       "rev": "N",
+       "itcavl": "Y",
+       "txval": 5000,
+       "igst": 900,
+       "cgst": 0,
+       "sgst": 0,
+       "cess": 0
+      }
+     ]
+    }
+   ],
+   "b2ba": [
+    {
+     "ctin": "29CDEFG3456H1Z2",
+     "trdnm": "Gamma Corp",
+     "inv": [
+      {
+       "inum": "INV-9A",
+       "oinum": "INV-9",
+       "oidt": "01-09-2026",
+       "dt": "02-09-2026",
+       "val": 2360,
+       "pos": "07",
+       "rev": "N",
+       "itcavl": "Y",
+       "items": [
+        {
+         "txval": 2000,
+         "igst": 360,
+         "cgst": 0,
+         "sgst": 0,
+         "cess": 0
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "cdnr": [
+    {
+     "ctin": "07ABCDE1234F1Z2",
+     "trdnm": "Alpha Traders",
+     "nt": [
+      {
+       "ntnum": "CN-001",
+       "ntty": "C",
+       "dt": "20-09-2026",
+       "val": 1180,
+       "txval": 1000,
+       "igst": 0,
+       "cgst": 90,
+       "sgst": 90,
+       "cess": 0
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

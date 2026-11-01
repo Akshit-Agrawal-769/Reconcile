@@ -1,0 +1,2 @@
+GSTIN of Supplier,Supplier Name,Document Type,Invoice Number,Invoice date,Place Of Supply,Reverse Charge,HSN/SAC,Rate,Taxable Value,Integrated Tax Paid,Central Tax Paid,State/UT Tax Paid,Cess Paid,Eligible for ITC
+07ABCDE1234F1Z2,Alpha Traders,Invoice,INV-001,05-09-2026,07,N,8471,18,10000.00,0,900.00,900.00,0,Yes
