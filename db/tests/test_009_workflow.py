@@ -277,11 +277,19 @@ def test_staff_import_into_closed_raises(conn):
 
 
 def test_partner_import_reopens_closed(conn):
+    # 013 (F1/C3): an import into a CLOSED month is refused for every role; the partner
+    # reopens with a reason first, and the reopen clears approval and close as before.
     ctx, _, _ = closed_period(conn)
     _grant_import(conn, "rc_partner")
     payload = build_2b_payload(ctx["g"], "092026", [doc(ctx["sup"], "INV-9", 900)])
+    with raises("period is closed"):
+        with conn.transaction():
+            as_role(conn, "partner", ctx["partner"])
+            import_2b(conn, ctx["pid"], payload, ctx["partner"])
+    assert state(conn, ctx["pid"]) == "CLOSED"
     with conn.transaction():
         as_role(conn, "partner", ctx["partner"])
+        conn.execute("SELECT sp_reopen_period(%s, 'late 2B')", (ctx["pid"],))
         import_2b(conn, ctx["pid"], payload, ctx["partner"])
         conn.execute("RESET ROLE")
     assert conn.execute(

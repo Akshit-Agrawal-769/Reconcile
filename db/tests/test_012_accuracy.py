@@ -158,9 +158,17 @@ def test_accuracy_targets(conn, tmp_path):
     for status in ("EXACT", "ROUNDING", "PROBABLE"):
         assert status in diag, status
         assert diag[status][0] >= 95, (status, diag[status])
+        assert diag[status][1] >= 95, (status, diag[status])   # recall
     # every truth row is accounted for exactly once
     total = conn.execute("SELECT count(*) FROM synth_truth").fetchone()[0]
     assert sum(r[2] for r in rows) == total
+    # ... and the matcher produced no unpaired / spurious results for the truth GSTINs
+    results = conn.execute(
+        "SELECT count(*) FROM recon_result r "
+        "JOIN gstr2b_import gi ON gi.import_id = r.import_id AND gi.is_current "
+        "JOIN return_period p ON p.period_id = gi.period_id "
+        "WHERE p.gstin IN (SELECT gstin FROM synth_truth)").fetchone()[0]
+    assert results == total
 
     # the composition client is loaded but not reconciled
     comp = [c for c in manifest if c["taxpayer_type"] == "COMPOSITION"][0]

@@ -102,6 +102,9 @@ def test_propose_large_needs_partner(conn):
         conn.execute("RESET ROLE")
     assert review(conn, rev) == ("PROPOSED", staff, None, D("20000.00"))
 
+    # 013 (F8) revoked EXECUTE on sp_approve from rc_staff; grant it back inside this
+    # test's transaction so the in-procedure role check is still exercised.
+    conn.execute("GRANT EXECUTE ON FUNCTION sp_approve(bigint) TO rc_staff")
     with pytest.raises(psycopg.errors.RaiseException, match="only a partner can approve"):
         with conn.transaction():
             as_role(conn, "staff", staff)

@@ -216,6 +216,9 @@ def test_client_summary_numbers(conn):
         "WHERE period_id = %s", (pid,)).fetchone()
     assert row == (D("3800.00"), D("1150.00"), D("400.00"), 2)
 
+    # 013 (F4): v_ims_plan is released only after client approval or a partner override
+    conn.execute("SELECT sp_submit_period(%s)", (pid,))
+    conn.execute("SELECT sp_partner_override(%s, 'client away')", (pid,))
     plan = conn.execute(
         "SELECT party_gstin, invoice_no, ims_action::text, remark FROM v_ims_plan "
         "WHERE period_id = %s ORDER BY invoice_no", (pid,)).fetchall()

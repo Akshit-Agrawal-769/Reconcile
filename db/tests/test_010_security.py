@@ -191,7 +191,8 @@ def test_staff_cannot_touch_other_client(conn):
             conn.execute("SELECT sp_propose(%s, 'ACCEPT', 'ACCEPT', NULL, NULL)", (rid,))
     payload = build_2b_payload(w["g1"], "092026", [dict(
         ctin=w["sup"], inum="INV-2", dt="10-09-2026", txval=100, igst=18)])
-    with pytest.raises(psycopg.errors.RaiseException, match="unknown period"):
+    # 013 (F1): the definer wrapper refuses before the core can report 'unknown period'
+    with pytest.raises(psycopg.errors.RaiseException, match="not your client"):
         with conn.transaction():
             as_(conn, w, "staff_b")
             conn.execute("SELECT sp_import_gstr2b(%s, %s::jsonb, 'DRAFT_2B', %s)",
@@ -266,6 +267,9 @@ def _import(conn, pid, g, docs, uid):
 
 def test_result_bound_to_its_import(conn):
     w = world(conn)
+    # 013 (F1) revoked recon_result DML from app roles; grant it back inside this test's
+    # transaction so the binding trigger (defence in depth) is still exercised as staff.
+    conn.execute("GRANT INSERT, UPDATE ON recon_result TO rc_staff")
     _, imp1, _ = reconciled(conn, w)
     inv1 = conn.execute("SELECT invoice_id, fin_year FROM invoice WHERE gstin = %s",
                         (w["g1"],)).fetchone()
@@ -318,6 +322,9 @@ def _awaiting(conn, w):
 
 def test_partner_closes_and_reopens_only_via_procedures(conn):
     w = world(conn)
+    # 013 (F1) revoked UPDATE on return_period; grant it back inside this test's
+    # transaction so the transition trigger (defence in depth) is still exercised.
+    conn.execute("GRANT UPDATE (state) ON return_period TO rc_partner")
     pid = _awaiting(conn, w)
     st = lambda: scalar(conn, "SELECT state::text FROM return_period WHERE period_id = %s",
                         (pid,))
