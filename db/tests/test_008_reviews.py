@@ -4,8 +4,9 @@ import psycopg
 import pytest
 
 from db.tests.conftest import as_role
-from db.tests.factories import (build_2b_payload, import_2b, make_client, make_invoice,
-                                make_party, make_period, make_reg, make_user, reconcile)
+from db.tests.factories import (assign, build_2b_payload, import_2b, make_client,
+                                make_invoice, make_party, make_period, make_reg, make_user,
+                                reconcile)
 
 SUP = "27"  # supplier in another state -> igst
 
@@ -14,6 +15,7 @@ def setup(conn, period="092026"):
     cid = make_client(conn)
     g = make_reg(conn, cid)
     staff = make_user(conn, "staff")
+    assign(conn, staff, cid)  # 010: staff act only on assigned clients
     partner = make_user(conn, "partner")
     return g, make_period(conn, g, period), staff, partner
 
