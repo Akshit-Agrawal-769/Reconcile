@@ -1,0 +1,7 @@
+# Runtime dependencies of the API and worker (Python 3.12+).
+starlette>=1.0
+uvicorn>=0.30
+python-multipart>=0.0.9
+itsdangerous>=2.2
+pydantic>=2.7
+psycopg[binary]>=3.1

@@ -221,3 +221,7 @@ __marimo__/
 
 # Generated synthetic data (tools/synth.py)
 data/
+
+# Web app build output and packages
+web/dist/
+web/node_modules/
