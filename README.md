@@ -58,8 +58,13 @@ Open http://localhost:8000. Every demo login uses the password `demo123`:
 | `partner@demo.test` | Partner: approves reviews, closes and reopens months |
 | `delta@demo.test` | The owner of Delta Distributors: sees four numbers and approves |
 
-Try a month: log in as staff A, open **Delta Distributors**, upload
-`data/demo/books_*.csv` then `data/demo/gstr2b_*.json`, and watch the queue fill. For
+The seed preloads **August 2026** for Delta Distributors: both files imported and
+matched, a few decisions already taken by staff A, supplier scores and the filing calendar
+filled in. Log in as staff A and open Delta to review it; log in as the partner to approve.
+
+To watch the pipeline live, open **September 2026** from the board (*Open a month*, GSTIN
+of Delta, `092026`), then upload `data/demo/books_*.csv` and `data/demo/gstr2b_*.json`.
+If you seeded before this change, run `bash scripts/dev.sh --reset` once to get August. For
 bigger files: `python tools/synth.py --clients 1 --docs 2000 --out data/synth/`.
 
 ## Tests

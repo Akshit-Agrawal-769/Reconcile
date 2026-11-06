@@ -40,7 +40,7 @@ export async function startStack({ port = 8811 } = {}) {
   buildWeb();
   const dbUrl = `${PG}/reconcile_e2e_${port}`;
   const out = mkdtempSync(join(tmpdir(), "reconcile-e2e-"));
-  const seed = JSON.parse(execFileSync(PY, ["scripts/seed_e2e.py", "--url", dbUrl, "--out", out, "--fresh"],
+  const seed = JSON.parse(execFileSync(PY, ["scripts/seed_e2e.py", "--url", dbUrl, "--out", out, "--fresh", "--empty-month"],
     { cwd: root, encoding: "utf8" }).trim().split("\n").pop());
   const env = { ...process.env, DATABASE_URL: dbUrl, REC_SECRET: "e2e-secret",
                 REC_STATIC_DIR: join(root, "web/dist") };

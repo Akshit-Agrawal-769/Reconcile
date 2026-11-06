@@ -136,9 +136,12 @@ def quotas(n, mix):
 class Numbers:
     """Per-client document numbers: 'INV-'/'CN-' + 6 digits, gaps >= 10, unique after norm."""
 
-    def __init__(self, rng):
+    def __init__(self, rng, month=9):
         self.rng = rng
-        self.next = {"INV": 100000 + rng.randint(0, 9999), "CN": 100000 + rng.randint(0, 9999)}
+        # Each month draws from its own block of a million numbers, so two months of the
+        # same client (same FY) never reuse a number. September keeps the original range.
+        base = 100000 + ((month - 9) % 12) * 1_000_000
+        self.next = {"INV": base + rng.randint(0, 9999), "CN": base + rng.randint(0, 9999)}
         self.used = set()
 
     def take(self, prefix):
@@ -237,7 +240,7 @@ def client_docs(rng, client, n, period):
     days = calendar.monthrange(year, month)[1]
     comp = client["taxpayer_type"] == "COMPOSITION"
     hsn = "998314" if client["taxpayer_type"] == "SERVICE" else "8471"
-    numbers = Numbers(rng)
+    numbers = Numbers(rng, month)
 
     if comp:
         perts = ["BOOKS_ONLY"] * n
